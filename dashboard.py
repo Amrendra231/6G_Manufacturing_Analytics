@@ -19,7 +19,7 @@ st.set_page_config(
 @st.cache_data
 def load_data():
     df = pd.read_csv("Thales_Group_Manufacturing.csv")
-    df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
+    df["Timestamp"] = pd.to_datetime(df["Timestamp"], format="mixed", errors="coerce")
     return df
 
 df = load_data()
@@ -34,7 +34,7 @@ st.write(
 )
 
 # =========================================================
-# SIDEBAR FILTERS (All Required Selectors Implemented)
+# SIDEBAR FILTERS
 # =========================================================
 st.sidebar.header("🎛️ Dashboard Filters")
 
@@ -52,14 +52,14 @@ machine_filter = st.sidebar.multiselect(
     default=sorted(df["Machine_ID"].dropna().unique())
 )
 
-# 3. Operation Mode Dropdown (REQUIRED)
+# 3. Operation Mode Dropdown
 operation_filter = st.sidebar.multiselect(
     "Select Operation Mode",
     options=sorted(df["Operation_Mode"].dropna().unique()),
     default=sorted(df["Operation_Mode"].dropna().unique())
 )
 
-# 4. Time Window Selector (REQUIRED)
+# 4. Time Window Selector
 min_date = df["Timestamp"].min().date() if not df["Timestamp"].isnull().all() else pd.to_datetime("today").date()
 max_date = df["Timestamp"].max().date() if not df["Timestamp"].isnull().all() else pd.to_datetime("today").date()
 
@@ -70,7 +70,7 @@ time_window = st.sidebar.date_input(
     max_value=max_date
 )
 
-# 5. Network Quality Filter (REQUIRED)
+# 5. Network Quality Filter
 network_quality = st.sidebar.selectbox(
     "Select Network Quality",
     options=["All", "Low Latency (Optimal)", "High Latency (Degraded)"]
@@ -104,7 +104,7 @@ elif network_quality == "High Latency (Degraded)":
     ]
 
 # =========================================================
-# REQUIRED NETWORK KPI CALCULATIONS
+# NETWORK KPI CALCULATIONS
 # =========================================================
 total_records = len(filtered_df)
 
@@ -115,7 +115,7 @@ if total_records > 0:
     # 1. Network Stability Index
     network_stability_index = max(0.0, 100.0 - (avg_lat * 0.5 + avg_pkt * 2.0))
     
-    # 2. Latency Sensitivity Score (Correlation with Production Speed)
+    # 2. Latency Sensitivity Score
     latency_sensitivity = filtered_df["Network_Latency_ms"].corr(filtered_df["Production_Speed_units_per_hr"])
     if np.isnan(latency_sensitivity):
         latency_sensitivity = 0.0
@@ -137,7 +137,7 @@ else:
     network_efficiency_correlation = 0.0
 
 # =========================================================
-# REQUIRED NETWORK KPI CARDS SECTION
+# NETWORK KPI CARDS SECTION
 # =========================================================
 st.subheader("📡 Network Performance KPIs")
 
@@ -196,7 +196,14 @@ with col1:
         )
 
         fig1, ax1 = plt.subplots(figsize=(7, 4.5))
-        sns.barplot(x=efficiency_count.index, y=efficiency_count.values, ax=ax1, palette="Set2")
+        sns.barplot(
+            x=efficiency_count.index, 
+            y=efficiency_count.values, 
+            ax=ax1, 
+            hue=efficiency_count.index, 
+            palette="Set2", 
+            legend=False
+        )
         ax1.set_title("Manufacturing Efficiency Distribution")
         ax1.set_ylabel("Count")
 
@@ -219,7 +226,14 @@ with col2:
         )
 
         fig2, ax2 = plt.subplots(figsize=(7, 4.5))
-        sns.barplot(x=latency_avg.index, y=latency_avg.values, ax=ax2, palette="Blues_d")
+        sns.barplot(
+            x=latency_avg.index, 
+            y=latency_avg.values, 
+            ax=ax2, 
+            hue=latency_avg.index, 
+            palette="Blues_d", 
+            legend=False
+        )
         ax2.set_title("Avg Latency (ms) across Efficiency Levels")
         ax2.set_ylabel("Latency (ms)")
 
@@ -233,7 +247,7 @@ with col2:
 st.divider()
 
 # =========================================================
-# 3 & 4. QUALITY & ERROR IMPACT PANEL (REQUIRED)
+# 3 & 4. QUALITY & ERROR IMPACT PANEL
 # =========================================================
 st.subheader("⚠️ Quality & Error Impact Panel")
 col1, col2 = st.columns(2)
