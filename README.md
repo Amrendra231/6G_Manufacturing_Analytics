@@ -184,12 +184,16 @@ The project includes a dashboard containing important manufacturing and network-
 
 ---
 
+``text
 📁 Project Structure
 
 ```text
 6G_Manufacturing_Analytics/
 │
+├── .gitignore
 ├── Thales_Group_Manufacturing.csv
 ├── analysis.py
+├── dashboard.py
 ├── 6G_Manufacturing_Dashboard.png
+├── Project_Report.md
 └── README.md
